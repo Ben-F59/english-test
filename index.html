@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test d'anglais aéronautique</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h1 {
+      font-size: 24px;
+      text-align: center;
+      color: #333;
+    }
+
+    .question {
+      margin-bottom: 20px;
+    }
+
+    .question h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .answers {
+      list-style: none;
+      padding: 0;
+    }
+
+    .answers li {
+      margin-bottom: 10px;
+    }
+
+    .answers input[type="radio"] {
+      margin-right: 10px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #007bff;
+      color: #fff;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    .feedback {
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .feedback.correct {
+      color: green;
+    }
+
+    .feedback.incorrect {
+      color: red;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Test d'anglais aéronautique</h1>
+    <div id="quiz">
+      <div class="question">
+        <h2 id="question-text"></h2>
+        <ul class="answers" id="answers"></ul>
+      </div>
+      <div id="feedback" class="feedback hidden"></div>
+      <button class="btn hidden" id="next-button">Next</button>
+    </div>
+    <div id="result" class="result hidden"></div>
+  </div>
+
+  <script>
+    const questions = [
+      // Questions 1 à 50 : Vocabulaire aéronautique et grammaire
+      { question: "What is the English word for 'cockpit'?", answers: ["Aile", "Train d’atterrissage", "Cabine de pilotage", "Fuselage"], correct: 2 },
+      { question: "What is the English translation of 'train d’atterrissage'?", answers: ["Rudder", "Landing gear", "Flap", "Propeller"], correct: 1 },
+      { question: "Which word best completes: 'The ___ is used to control the aircraft's direction in flight'?", answers: ["Wing", "Fuselage", "Rudder", "Flap"], correct: 2 },
+      { question: "What is the English word for 'moteur'?", answers: ["Engine", "Wing", "Cabin", "Fuselage"], correct: 0 },
+      { question: "Complete: 'The ___ provides lift during takeoff.'", answers: ["Rudder", "Wings", "Landing gear", "Cockpit"], correct: 1 },
+      { question: "What does 'fuselage' mean in French?", answers: ["Cockpit", "Fuselage", "Train d'atterrissage", "Aile"], correct: 1 },
+      { question: "The mechanic ___ (tighten) the bolts yesterday.", answers: ["tightens", "tightened", "is tightening", "will tighten"], correct: 1 },
+      { question: "Which tool is used to tighten screws?", answers: ["Screwdriver", "Wrench", "Pliers", "Drill"], correct: 0 },
+      { question: "What is the English word for 'aileron'?", answers: ["Winglet", "Aileron", "Flap", "Rudder"], correct: 1 },
+      { question: "The pilot checks the instruments ___ each flight.", answers: ["before", "after", "during", "in"], correct: 0 },
+      { question: "Choose the correct form: 'The aircraft ___ inspected daily.'", answers: ["is", "are", "was", "were"], correct: 0 },
+      { question: "The mechanic is responsible ___ inspecting the engines.", answers: ["for", "to", "in", "on"], correct: 0 },
+      { question: "The ___ must be tightened before takeoff.", answers: ["bolts", "propellers", "engines", "wings"], correct: 0 },
+      { question: "The cabin crew performs safety ___ before takeoff.", answers: ["demonstrations", "repairs", "checks", "landings"], correct: 0 },
+      { question: "The ___ is used to stabilize the plane during flight.", answers: ["rudder", "engine", "landing gear", "flap"], correct: 0 },
+
+      // Questions 51 à 100 : Compréhension de textes courts
+      { question: "The pilot performs a checklist before every flight. What does the pilot check?", answers: ["Only the cockpit", "The engines, fuel levels, and cockpit instruments", "The wings and exterior of the aircraft", "The cabin crew’s schedule"], correct: 1 },
+      { question: "The landing gear must always be inspected before takeoff. Why?", answers: ["To ensure the aircraft can steer during flight", "To make sure the aircraft can land safely", "To prevent fuel leakage", "To reduce noise during landing"], correct: 1 },
+      { question: "Ailerons are small hinged sections on the wings. What do they control?", answers: ["Altitude", "Speed", "Roll", "Landing"], correct: 2 },
+      { question: "The cabin crew performs safety demonstrations before takeoff. What is their responsibility?", answers: ["Piloting the aircraft", "Performing safety demonstrations", "Inspecting the engines", "Tightening bolts"], correct: 1 },
+      { question: "The aircraft landed safely despite strong winds. What did the pilot use to stabilize the plane?", answers: ["The cockpit instruments", "The rudder and ailerons", "The landing gear", "The engines"], correct: 1 }
+      // Ajoutez d'autres questions pour atteindre 100
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionText = document.getElementById("question-text");
+    const answersList = document.getElementById("answers");
+    const feedbackDiv = document.getElementById("feedback");
+    const nextButton = document.getElementById("next-button");
+    const resultDiv = document.getElementById("result");
+
+    function loadQuestion() {
+      const current = questions[currentQuestion];
+      questionText.textContent = current.question;
+      answersList.innerHTML = "";
+      feedbackDiv.classList.add("hidden");
+      nextButton.classList.add("hidden");
+      current.answers.forEach((answer, index) => {
+        const li = document.createElement("li");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "answer";
+        input.value = index;
+        input.id = "answer" + index;
+        input.addEventListener("change", () => handleAnswer(index));
+        const label = document.createElement("label");
+        label.htmlFor = "answer" + index;
+        label.textContent = answer;
+        li.appendChild(input);
+        li.appendChild(label);
+        answersList.appendChild(li);
+      });
+    }
+
+    function handleAnswer(selectedIndex) {
+      const current = questions[currentQuestion];
+      feedbackDiv.classList.remove("hidden");
+      if (selectedIndex === current.correct) {
+        feedbackDiv.textContent = "Correct!";
+        feedbackDiv.classList.remove("incorrect");
+        feedbackDiv.classList.add("correct");
+        score++;
+      } else {
+        feedbackDiv.textContent = `Incorrect! The correct answer is: "${current.answers[current.correct]}".`;
+        feedbackDiv.classList.remove("correct");
+        feedbackDiv.classList.add("incorrect");
+      }
+      nextButton.classList.remove("hidden");
+    }
+
+    nextButton.addEventListener("click", () => {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        document.getElementById("quiz").classList.add("hidden");
+        resultDiv.classList.remove("hidden");
+        resultDiv.textContent = `Your final score: ${score} / ${questions.length}`;
+      }
+    });
+
+    loadQuestion();
+  </script>
+</body>
+</html>
